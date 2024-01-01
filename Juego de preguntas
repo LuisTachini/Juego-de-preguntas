@@ -1,0 +1,155 @@
+import tkinter as tk
+
+class PreguntasRespuestas:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Preguntas y Respuestas")
+        self.master.geometry("800x500")
+        self.master.configure(bg="#E0F7FA")
+
+        self.preguntas = [
+            {"pregunta": "¿Cuál es la capital de Francia?", "opciones": ["Madrid", "París", "Londres", "Berlín"], "respuesta_correcta": "París"},
+            {"pregunta": "¿En qué año se fundó la ONU?", "opciones": ["1945", "1955", "1965", "1975"], "respuesta_correcta": "1945"},
+            {"pregunta": "¿Cuál es el océano más grande?", "opciones": ["Atlántico", "Índico", "Pacífico", "Ártico"], "respuesta_correcta": "Pacífico"},
+            {"pregunta": "¿Quién escribió 'Cien años de soledad'?", "opciones": ["Gabriel García Márquez", "Pablo Neruda", "Julio Cortázar", "Mario Vargas Llosa"], "respuesta_correcta": "Gabriel García Márquez"},
+            {"pregunta": "¿Cuál es el componente principal del aire que respiramos?", "opciones": ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Argón"], "respuesta_correcta": "Nitrógeno"},
+            {"pregunta": "¿En qué país se encuentra la Gran Muralla China?", "opciones": ["China", "Japón", "India", "Corea del Sur"], "respuesta_correcta": "China"},
+            {"pregunta": "¿Cuál es la montaña más alta del mundo?", "opciones": ["Monte Everest", "Monte Kilimanjaro", "Monte McKinley", "Monte Aconcagua"], "respuesta_correcta": "Monte Everest"},
+            {"pregunta": "¿Quién pintó la Mona Lisa?", "opciones": ["Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Claude Monet"], "respuesta_correcta": "Leonardo da Vinci"},
+            {"pregunta": "¿Cuál es el río más largo del mundo?", "opciones": ["Amazonas", "Nilo", "Yangtsé", "Misisipi"], "respuesta_correcta": "Amazonas"},
+            {"pregunta": "¿En qué año se independizó Estados Unidos?", "opciones": ["1776", "1789", "1804", "1812"], "respuesta_correcta": "1776"},
+            {"pregunta": "¿Cuántos continentes hay en el mundo?", "opciones": ["5", "6", "7", "8"], "respuesta_correcta": "7"},
+            {"pregunta": "¿Qué planeta es conocido como 'el planeta rojo'?", "opciones": ["Venus", "Marte", "Júpiter", "Saturno"], "respuesta_correcta": "Marte"},
+            {"pregunta": "¿Cuál es la capital de Japón?", "opciones": ["Pekín", "Tokio", "Seúl", "Bangkok"], "respuesta_correcta": "Tokio"},
+            {"pregunta": "¿Quién fue el primer presidente de Estados Unidos?", "opciones": ["George Washington", "Thomas Jefferson", "John Adams", "Benjamin Franklin"], "respuesta_correcta": "George Washington"},
+            {"pregunta": "¿Cuál es el metal más abundante en la corteza terrestre?", "opciones": ["Hierro", "Aluminio", "Cobre", "Plomo"], "respuesta_correcta": "Aluminio"},
+            {"pregunta": "¿En qué año se llevó a cabo la Revolución Rusa?", "opciones": ["1917", "1923", "1930", "1945"], "respuesta_correcta": "1917"},
+            {"pregunta": "¿Cuál es el animal más grande del mundo?", "opciones": ["Elefante", "Ballena azul", "Jirafa", "Tiburón blanco"], "respuesta_correcta": "Ballena azul"},
+            {"pregunta": "¿Quién fue el autor de 'Romeo y Julieta'?", "opciones": ["William Shakespeare", "Charles Dickens", "Jane Austen", "Fiodor Dostoievski"], "respuesta_correcta": "William Shakespeare"},
+            {"pregunta": "¿En qué año llegó el hombre a la Luna por primera vez?", "opciones": ["1965", "1969", "1973", "1977"], "respuesta_correcta": "1969"},
+            {"pregunta": "¿Cuál es la bebida más consumida en el mundo después del agua?", "opciones": ["Té", "Café", "Refresco", "Leche"], "respuesta_correcta": "Té"}
+        ]
+
+        self.pregunta_actual = 0
+        self.respuesta_usuario = tk.StringVar()
+        self.aciertos = 0
+
+        self.label_pregunta = tk.Label(master, text="", font=("Helvetica", 18), bg="#E0F7FA")
+        self.label_pregunta.pack(pady=20)
+
+        self.opciones_var = []
+        for i in range(4):
+            opcion = tk.Radiobutton(master, text="", variable=self.respuesta_usuario, value="",
+                                    indicatoron=0, font=("Helvetica", 14), bg="#E0F7FA",
+                                    command=self.mostrar_resultado_pregunta, width=20)
+            opcion.pack(pady=5)
+            self.opciones_var.append(opcion)
+
+            opcion.bind("<Enter>", lambda event, button=opcion, size=16: self.on_enter(event, button, size))
+            opcion.bind("<Leave>", lambda event, button=opcion, size=14: self.on_leave(event, button, size))
+
+        self.resultado_label = tk.Label(master, text="", font=("Helvetica", 16), bg="#E0F7FA")
+        self.resultado_label.pack(pady=20)
+
+        self.siguiente_boton = tk.Button(master, text="Siguiente", command=self.mostrar_siguiente_pregunta,
+                                         font=("Helvetica", 14), bg="#81D4FA", activebackground="#4FC3F7", width=20)
+        self.siguiente_boton.pack(pady=10)
+
+        self.habilitar_opciones()
+        self.mostrar_siguiente_pregunta()
+
+    def mostrar_siguiente_pregunta(self):
+        self.resultado_label.config(text="")
+        self.habilitar_opciones()
+        self.siguiente_boton.config(state=tk.DISABLED)
+        if self.pregunta_actual < len(self.preguntas):
+            pregunta_actual = self.preguntas[self.pregunta_actual]
+            self.label_pregunta.config(text=pregunta_actual["pregunta"])
+
+            opciones = pregunta_actual["opciones"]
+            for i in range(4):
+                self.opciones_var[i].config(text=opciones[i], value=opciones[i])
+
+            self.pregunta_actual += 1
+        else:
+            self.mostrar_resultado_final()
+
+    def mostrar_resultado_pregunta(self):
+        self.resultado_label.config(text="")
+        if self.pregunta_actual > 0:
+            respuesta_usuario = self.respuesta_usuario.get()
+
+            if respuesta_usuario:
+                pregunta_actual = self.preguntas[self.pregunta_actual - 1]
+                respuesta_correcta = pregunta_actual["respuesta_correcta"]
+
+                if respuesta_usuario == respuesta_correcta:
+                    mensaje_respuesta = "¡Correcto! Has acertado."
+                    self.aciertos += 1
+                else:
+                    mensaje_respuesta = f"Incorrecto. La respuesta correcta es: {respuesta_correcta}."
+
+                self.resultado_label.config(text=mensaje_respuesta)
+                self.deshabilitar_opciones()
+                self.siguiente_boton.config(state=tk.NORMAL)
+            else:
+                mensaje_error = "Por favor, selecciona una respuesta antes de pasar a la siguiente pregunta."
+                self.resultado_label.config(text=mensaje_error, fg="red")
+
+    def mostrar_resultado_final(self):
+        for opcion in self.opciones_var:
+            opcion.pack_forget()
+        mensaje_felicidad = f"¡Felicidades! Has respondido {self.aciertos} de {len(self.preguntas)} preguntas correctamente."
+        self.label_pregunta.config(text=mensaje_felicidad, font=("Helvetica", 20), fg="green")
+
+        # Reemplazar el botón "Siguiente" por uno de reinicio
+        self.siguiente_boton.destroy()
+        self.reiniciar_boton = tk.Button(self.master, text="Reiniciar", command=self.reiniciar_juego,
+                                         font=("Helvetica", 14), bg="#81D4FA", activebackground="#4FC3F7", width=20)
+        self.reiniciar_boton.pack(pady=10)
+
+    def reiniciar_juego(self):
+        self.pregunta_actual = 0
+        self.aciertos = 0
+        self.resultado_label.config(text="")
+        self.label_pregunta.config(text="")
+        self.reiniciar_boton.destroy()
+
+        # Volver a crear los botones de opciones y el botón "Siguiente"
+        self.opciones_var = []
+        for i in range(4):
+            opcion = tk.Radiobutton(self.master, text="", variable=self.respuesta_usuario, value="",
+                                    indicatoron=0, font=("Helvetica", 14), bg="#E0F7FA",
+                                    command=self.mostrar_resultado_pregunta, width=20)
+            opcion.pack(pady=5)
+            self.opciones_var.append(opcion)
+
+            opcion.bind("<Enter>", lambda event, button=opcion, size=16: self.on_enter(event, button, size))
+            opcion.bind("<Leave>", lambda event, button=opcion, size=14: self.on_leave(event, button, size))
+
+        self.siguiente_boton = tk.Button(self.master, text="Siguiente", command=self.mostrar_siguiente_pregunta,
+                                         font=("Helvetica", 14), bg="#81D4FA", activebackground="#4FC3F7", width=20)
+        self.siguiente_boton.pack(pady=10)
+
+        self.habilitar_opciones()
+        self.mostrar_siguiente_pregunta()
+
+    def habilitar_opciones(self):
+        for opcion in self.opciones_var:
+            opcion.config(state=tk.NORMAL)
+
+    def deshabilitar_opciones(self):
+        for opcion in self.opciones_var:
+            opcion.config(state=tk.DISABLED)
+
+    def on_enter(self, event, widget, size):
+        widget.config(font=("Helvetica", size + 2))
+
+    def on_leave(self, event, widget, size):
+        widget.config(font=("Helvetica", size))
+
+# Crear la aplicación y ejecutarla
+root = tk.Tk()
+root.configure(bg="#E0F7FA")
+juego = PreguntasRespuestas(root)
+root.mainloop()
